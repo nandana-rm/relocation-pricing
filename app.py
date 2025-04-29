@@ -28,22 +28,28 @@ pricing = {
     "Luxury Car": 3500, "Sedan Car": 2800
 }
 
+@app.route('/')
+def home():
+    return "Welcome! This is the relocation quote API. POST to /calculate to get a quote."
+
 @app.route('/calculate', methods=['POST'])
 def calculate():
     data = request.get_json()
-    pickup_floor = data.get('pickup_floor', 0)
-    drop_floor = data.get('drop_floor', 0)
+
+    pickup_floor = int(data.get('pickup_floor', 0))
+    drop_floor = int(data.get('drop_floor', 0))
     pickup_lift = data.get('pickup_lift', True)
     drop_lift = data.get('drop_lift', True)
     items = data.get('items', [])
 
     total = 0
     for item in items:
-        name = item['name']
-        quantity = item.get('quantity', 1)
+        name = item.get('name')
+        quantity = int(item.get('quantity', 1))
         cost = pricing.get(name, 0)
         total += cost * quantity
 
+    # Calculate floor charges
     floor_charge = 0
     if not pickup_lift:
         floor_charge += pickup_floor * 100
@@ -58,4 +64,4 @@ def calculate():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)  # Change port to 10000 for Render
+    app.run(host='0.0.0.0', port=10000)
