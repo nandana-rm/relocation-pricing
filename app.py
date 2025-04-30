@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, redirect
 
 app = Flask(__name__)
 
@@ -49,7 +49,7 @@ def calculate():
         cost = pricing.get(name, 0)
         total += cost * quantity
 
-    # Calculate floor charges
+    # Floor charges
     floor_charge = 0
     if not pickup_lift:
         floor_charge += pickup_floor * 100
@@ -58,10 +58,24 @@ def calculate():
 
     total += floor_charge
 
-    return jsonify({
-        'total_estimate': total,
-        'floor_charge': floor_charge
-    })
+    # Redirect to thank you page
+    return redirect(f"/thankyou?estimate={total}")
+
+@app.route('/thankyou')
+def thankyou():
+    estimate = request.args.get('estimate')
+    return f"""
+    <html>
+    <head><title>Estimate Received</title></head>
+    <body style='font-family:Arial; padding:40px; background-color:#f9f9f9; color:#333;'>
+        <h2>🎉 Thank You for Submitting!</h2>
+        <p>Your estimated relocation cost is: <strong style='font-size:24px;'>₹{estimate}</strong></p>
+        <p>Our team will contact you shortly to assist you further.</p>
+        <br>
+        <p style='font-size:12px; color:#888;'>Powered by MoveABox Logistics</p>
+    </body>
+    </html>
+    """
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
